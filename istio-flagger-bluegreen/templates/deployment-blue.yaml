@@ -1,0 +1,110 @@
+{{ if .Values.blue.enabled }}
+---
+apiVersion: flagger.app/v1alpha3
+kind: Canary
+metadata:
+  name: blue-canary
+#  namespace: test
+spec:
+  # service mesh provider (optional)
+  # can be: kubernetes, istio, appmesh, smi, nginx, gloo, supergloo
+  # use the kubernetes provider for Blue/Green style deployments
+  provider: istio
+  # deployment reference
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{.Chart.Name}}-blue # this will generate a service with the same name
+  # the maximum time in seconds for the canary deployment
+  # to make progress before it is rollback (default 600s)
+  progressDeadlineSeconds: 60
+  # HPA reference (optional)
+  #  autoscalerRef:
+  #    apiVersion: autoscaling/v2beta1
+  #    kind: HorizontalPodAutoscaler
+  #    name: podinfo
+  service:
+    # container port
+    port: 8080
+    # service port name (optional, will default to "http")
+    #    portName: http-podinfo
+    # Istio gateways (optional)
+    #    gateways:
+    #      - public-gateway.istio-system.svc.cluster.local
+    # Istio virtual service host names (optional)
+  #    hosts:
+  #      - podinfo.example.com
+  # promote the canary without analysing it (default false)
+  skipAnalysis: true
+  # define the canary analysis timing and KPIs
+  canaryAnalysis:
+    # schedule interval (default 60s)
+    interval: 1m
+    # max number of failed metric checks before rollback
+    threshold: 10
+    # max traffic percentage routed to canary
+    # percentage (0-100)
+    maxWeight: 50
+    # canary increment step
+    # percentage (0-100)
+    stepWeight: 5
+    # Prometheus checks
+    metrics:
+      - name: request-success-rate
+        # minimum req success rate (non 5xx responses)
+        # percentage (0-100)
+        threshold: 99
+        interval: 1m
+      - name: request-duration
+        # maximum req duration P99
+        # milliseconds
+        threshold: 500
+        interval: 30s
+    # external checks (optional)
+#    webhooks:
+#      - name: integration-tests
+#        url: http://podinfo.test:9898/echo
+#        timeout: 1m
+#        # key-value pairs (optional)
+#        metadata:
+#          test: "all"
+#          token: "16688eb5e9f289f1991c"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}-blue
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}-blue
+  template:
+    metadata:
+      labels:
+        app: {{.Chart.Name}}-blue
+    spec:
+      containers:
+        - name: {{.Chart.Name}}-blue
+          image: "cmoon/hello:{{.Values.version}}"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
+{{ end }}

@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: {{.Values.numreplicas}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      namespace: {{.Values.namespace}}
+      labels:
+        app: {{.Chart.Name}}
+      annotations:
+        deployedTime: {{ now }} # use `now` to make sure every time the deployment is different, so that no need to use `--recreate-pods`
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: "skycmoon/helloworld:{{.Values.version}}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VERSION
+              value: {{.Values.version}}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{.Chart.Name}}
+  namespace: {{.Values.namespace}}
+spec:
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: {{.Chart.Name}}
+  minReplicas: {{.Values.numreplicas}}
+  maxReplicas: {{.Values.maxreplicas}}

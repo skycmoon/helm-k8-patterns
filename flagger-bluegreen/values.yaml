@@ -1,0 +1,7 @@
+version: latest
+namespace: bluegreen
+environment: test
+
+numreplicas: 2
+maxreplicas: 5
+maxutilization: 85

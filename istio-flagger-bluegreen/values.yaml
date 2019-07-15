@@ -1,0 +1,6 @@
+version: v1.0.0
+green:
+  enabled: false
+blue:
+  enabled: true
+prodFlag: blue

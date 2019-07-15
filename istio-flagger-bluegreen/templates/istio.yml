@@ -1,0 +1,94 @@
+# V2 with istio
+{{- $fullName := .Release.Name -}}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ $fullName }}-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ $fullName }}-router-service
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - {{ $fullName }}-gateway
+  http:
+      - route:
+        - destination:
+            host: "{{.Chart.Name}}-{{.Values.prodFlag}}"
+            port:
+              number: 8080
+          weight: 100
+        - destination:
+            {{- if eq .Values.prodFlag "blue" }}
+            host: "{{.Chart.Name}}-green"
+            {{- else }}
+            host: "{{.Chart.Name}}-blue"
+            {{- end }}
+            port:
+              number: 8080
+          weight: 0
+        mirror:
+          {{- if eq .Values.prodFlag "blue" }}
+          host: "{{.Chart.Name}}-green"
+          {{- else }}
+          host: "{{.Chart.Name}}-blue"
+          {{- end }}
+          port:
+            number: 8080
+# V1 with Ingress
+#---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: {{ $fullName }}-root-ingress
+#  annotations:
+#    kubernetes.io/ingress.class: "nginx"
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      mirror /mirror;
+#      mirror_request_body on;
+#    nginx.ingress.kubernetes.io/server-snippet: |
+#      location = /mirror/ {
+#          internal;
+#          proxy_pass http://mirror.barge.expedia.com/;
+#      }
+#spec:
+#  rules:
+#    - host: barge.expedia.com
+#      http:
+#        paths:
+#          - path: /
+#            backend:
+#              serviceName: {{ $fullName }}-service-prod
+#              servicePort: 8081
+#
+#---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: {{ $fullName }}-stage-ingress
+#  annotations:
+#    kubernetes.io/ingress.class: "nginx"
+#spec:
+#  rules:
+#    - host: mirror.barge.expedia.com
+#      http:
+#        paths:
+#          - path: /
+#            backend:
+#              serviceName: {{ $fullName }}-service-stage
+#              servicePort: 8081

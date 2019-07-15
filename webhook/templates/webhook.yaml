@@ -1,0 +1,70 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{.Values.namespace}}
+  name: {{.Chart.Name}}
+  labels:
+    app: {{.Chart.Name}}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: webhook.eks-dev-compute.us-west-2.test.egailabs.expedia.com
+      http:
+        paths:
+          - backend:
+              serviceName: {{.Chart.Name}}
+              servicePort: http
+            path: /
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{.Values.namespace}}
+  name: {{.Chart.Name}}
+  labels:
+    app: {{.Chart.Name}}
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: {{.Chart.Name}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{.Values.namespace}}
+  name: {{.Chart.Name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Chart.Name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Chart.Name}}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: "skycmoon/flagger-webhook:{{.Values.version}}" #TODO decide which image we need to use.
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
