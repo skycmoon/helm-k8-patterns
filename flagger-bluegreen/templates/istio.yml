@@ -20,9 +20,45 @@
 {{/*        port: 80*/}}
 {{/*        paths:*/}}
 {{/*          - backend:*/}}
-{{/*              serviceName: {{.Chart.Name}}*/}}
+{{/*              serviceName: {{.Chart.Name}}-router*/}}
 {{/*              servicePort: 8080*/}}
 {{/*            path: /*/}}
+
+{{/*---*/}}
+{{/*apiVersion: v1*/}}
+{{/*kind: Service*/}}
+{{/*metadata:*/}}
+{{/*  namespace: {{.Values.namespace}}*/}}
+{{/*  name: {{.Chart.Name}}-router*/}}
+{{/*  labels:*/}}
+{{/*    app: {{.Chart.Name}}-router*/}}
+{{/*spec:*/}}
+{{/*  type: ExternalName*/}}
+{{/*  externalName: {{.Chart.Name}}-router.com*/}}
+
+{{/*---*/}}
+{{/*apiVersion: networking.istio.io/v1alpha3*/}}
+{{/*kind: VirtualService*/}}
+{{/*metadata:*/}}
+{{/*  name: {{.Chart.Name}}-router*/}}
+{{/*  namespace: {{.Values.namespace}}*/}}
+{{/*  labels:*/}}
+{{/*    app: {{.Chart.Name}}-router*/}}
+{{/*spec:*/}}
+{{/*  hosts:*/}}
+{{/*    - {{.Chart.Name}}-router*/}}
+{{/*  gateways:*/}}
+{{/*    - mesh*/}}
+{{/*  http:*/}}
+{{/*    - route:*/}}
+{{/*        - destination:*/}}
+{{/*            host: "{{.Chart.Name}}"*/}}
+{{/*            port:*/}}
+{{/*              number: 8080*/}}
+{{/*      mirror:*/}}
+{{/*        host: "{{.Chart.Name}}-canary"*/}}
+{{/*        port:*/}}
+{{/*          number: 8080*/}}
 
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -39,7 +75,7 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - "*"
+        - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
 
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -51,7 +87,7 @@ metadata:
     app: {{.Chart.Name}}-router
 spec:
   hosts:
-    - "*"
+    - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
   gateways:
     - {{.Chart.Name}}
   http:
