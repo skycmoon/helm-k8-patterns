@@ -12,7 +12,7 @@ spec:
     name: {{.Chart.Name}} # this will generate a service with the same name
   # the maximum time in seconds for the canary deployment
   # to make progress before it is rollback (default 600s)
-  progressDeadlineSeconds: 300
+  progressDeadlineSeconds: 172800  # 48h
   autoscalerRef:
     apiVersion: autoscaling/v2beta1
     kind: HorizontalPodAutoscaler
@@ -21,26 +21,22 @@ spec:
     port: 8080
   skipAnalysis: false
   canaryAnalysis:
-    # schedule interval (default 60s)
+    # 30s * 5760 = 48h, This time is skipped for each stepping-up if it does not have metrics setup.
     interval: 30s
-    # max number of failed metric checks before rollback
-    threshold: 10
-    # max traffic percentage routed to canary
-    # percentage (0-100)
-    maxWeight: 20
-    # canary increment step
-    # percentage (0-100)
-    stepWeight: 10
+    threshold: 5760
+    # max weight should be bigger than step weight to prevent releasing the new version before release-approval-check returns.
+    maxWeight: 10
+    stepWeight: 5
     webhooks:
       - name: release-approval-check
         type: rollout
         url: http://webhook.kube-system/release-approvals/check
-        timeout: 20m
+        timeout: 10s
         metadata:
           token: {{.Values.version}}
       - name: log-release-version
         type: post-rollout
         url: http://webhook.kube-system/released-apps
-        timeout: 20m
+        timeout: 10s
         metadata:
           token: {{.Values.version}}
