@@ -10,8 +10,6 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{.Chart.Name}} # this will generate a service with the same name
-  # the maximum time in seconds for the canary deployment
-  # to make progress before it is rollback (default 600s)
   progressDeadlineSeconds: 172800  # 48h
   autoscalerRef:
     apiVersion: autoscaling/v2beta1
