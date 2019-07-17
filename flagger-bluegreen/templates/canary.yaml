@@ -19,12 +19,11 @@ spec:
     port: 8080
   skipAnalysis: false
   canaryAnalysis:
-    # 30s * 5760 = 48h, This time is skipped for each stepping-up if it does not have metrics setup.
-    interval: 30s
-    threshold: 5760
+    interval: {{.Values.releaseApprovalPollingInterval}}
+    threshold: {{.Values.releaseApprovalPollingCount}}
     # max weight should be bigger than step weight to prevent releasing the new version before release-approval-check returns.
-    maxWeight: 10
-    stepWeight: 5
+    maxWeight: 2
+    stepWeight: 1
     webhooks:
       - name: release-approval-check
         type: rollout

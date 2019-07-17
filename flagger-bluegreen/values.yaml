@@ -5,3 +5,7 @@ environment: test
 numreplicas: 2
 maxreplicas: 5
 maxutilization: 85
+
+# polling interval * polling count = total time to hold canary before rolling back.
+releaseApprovalPollingInterval: 1m
+releaseApprovalPollingCount: 2880
