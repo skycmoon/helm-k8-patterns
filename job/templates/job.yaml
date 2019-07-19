@@ -1,0 +1,14 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{.Values.namespace}}
+  name: {{.Chart.Name}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: {{.Values.image}}:{{.Values.version}}
+      restartPolicy: Never
+  backoffLimit: 4
