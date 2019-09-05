@@ -13,7 +13,7 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
+        - {{.Chart.Name}}.eks-dev-compute-i.us-west-2.test.egailabs.expedia.com
 
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -25,7 +25,7 @@ metadata:
     app: {{.Chart.Name}}-router
 spec:
   hosts:
-    - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
+    - {{.Chart.Name}}.eks-dev-compute-i.us-west-2.test.egailabs.expedia.com
   gateways:
     - {{.Chart.Name}}
   http:
