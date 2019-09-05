@@ -1,6 +1,8 @@
 version: latest
 namespace: bluegreen
 environment: test
+region: us-west-2
+clusterName: eks-dev-compute-i
 
 numreplicas: 2
 maxreplicas: 5
@@ -9,3 +11,4 @@ maxutilization: 85
 # polling interval * polling count = total time to hold canary before rolling back.
 releaseApprovalPollingInterval: 1m
 releaseApprovalPollingCount: 2880
+progressDeadlineInSeconds: 172800 # 48 hours

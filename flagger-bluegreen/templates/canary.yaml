@@ -10,13 +10,24 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{.Chart.Name}} # this will generate a service with the same name
-  progressDeadlineSeconds: 172800  # 48h
+  progressDeadlineSeconds: 172800 # 48 hours
   autoscalerRef:
     apiVersion: autoscaling/v2beta1
     kind: HorizontalPodAutoscaler
     name: {{.Chart.Name}}
   service:
     port: 8080
+    gateways:
+      - {{.Chart.Name}}
+      - vpce-{{.Chart.Name}}
+    hosts:
+      - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+      - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    match:
+      - uri:
+          prefix: /{{.Chart.Name}}
   skipAnalysis: false
   canaryAnalysis:
     interval: {{.Values.releaseApprovalPollingInterval}}
@@ -25,15 +36,15 @@ spec:
     maxWeight: 2
     stepWeight: 1
     webhooks:
-      - name: release-approval-check
+      - name: check-release-approval
         type: rollout
-        url: http://webhook.kube-system/release-approvals/check
+        url: http://amerigo-model-manager.barge.svc.cluster.local/internal/flagger/rollout/{{.Chart.Name}}
         timeout: 10s
         metadata:
-          token: {{.Values.version}}
-      - name: log-release-version
+          version: {{.Values.version}}
+      - name: log-rollout-result
         type: post-rollout
-        url: http://webhook.kube-system/released-apps
+        url: http://amerigo-model-manager.barge.svc.cluster.local/internal/flagger/post-rollout/{{.Chart.Name}}
         timeout: 10s
         metadata:
-          token: {{.Values.version}}
+          version: {{.Values.version}}

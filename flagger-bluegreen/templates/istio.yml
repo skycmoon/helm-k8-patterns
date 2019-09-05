@@ -6,97 +6,91 @@ metadata:
   namespace: {{.Values.namespace}}
 spec:
   selector:
-    istio: ingressgateway # use istio default controller
+    istio: ingressgateway
   servers:
     - port:
         number: 80
         name: http
         protocol: HTTP
       hosts:
-        - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+        privateKey: /etc/istio/ingressgateway-certs/tls.key
+      hosts:
+        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: vpce-{{.Chart.Name}}
+  namespace: {{.Values.namespace}}
+spec:
+  selector:
+    istio: vpce-ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        serverCertificate: /etc/istio/vpce-ingressgateway-certs/tls.crt
+        privateKey: /etc/istio/vpce-ingressgateway-certs/tls.key
+      hosts:
+        - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{.Chart.Name}}-router
+  name: {{.Chart.Name}}
   namespace: {{.Values.namespace}}
   labels:
-    app: {{.Chart.Name}}-router
+    app: {{.Chart.Name}}
 spec:
   hosts:
-    - {{.Chart.Name}}.eks-dev-compute2.us-west-2.test.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
   gateways:
     - {{.Chart.Name}}
+    - vpce-{{.Chart.Name}}
   http:
-    - route:
+    - match:
+        - uri:
+            prefix: /{{.Chart.Name}}
+      route:
         - destination:
-            host: "{{.Chart.Name}}"
+            host: {{.Chart.Name}}
             port:
               number: 8080
       mirror:
-        host: "{{.Chart.Name}}-canary"
+        host: {{.Chart.Name}}-canary
         port:
           number: 8080
-
-{{/*---*/}}
-{{/*apiVersion: extensions/v1beta1*/}}
-{{/*kind: Ingress*/}}
-{{/*metadata:*/}}
-{{/*  name: {{.Chart.Name}}*/}}
-{{/*  namespace: {{.Values.namespace}}*/}}
-{{/*  labels:*/}}
-{{/*    app: {{.Chart.Name}}*/}}
-{{/*  annotations:*/}}
-{{/*      {{ if and (.Values.environment) (eq .Values.environment "local") }}*/}}
-{{/*    kubernetes.io/ingress.class: nginx*/}}
-{{/*    nginx.ingress.kubernetes.io/enable-cors: "true"*/}}
-{{/*      {{ else }}*/}}
-{{/*    kubernetes.io/ingress.class: traefik*/}}
-{{/*    {{ end }}*/}}
-{{/*spec:*/}}
-{{/*  rules:*/}}
-{{/*    - host: {{.Chart.Name}}.eks-dev-compute.us-west-2.test.egailabs.expedia.com*/}}
-{{/*      http:*/}}
-{{/*        port: 80*/}}
-{{/*        paths:*/}}
-{{/*          - backend:*/}}
-{{/*              serviceName: {{.Chart.Name}}-router*/}}
-{{/*              servicePort: 8080*/}}
-{{/*            path: /*/}}
-
-{{/*---*/}}
-{{/*apiVersion: v1*/}}
-{{/*kind: Service*/}}
-{{/*metadata:*/}}
-{{/*  namespace: {{.Values.namespace}}*/}}
-{{/*  name: {{.Chart.Name}}-router*/}}
-{{/*  labels:*/}}
-{{/*    app: {{.Chart.Name}}-router*/}}
-{{/*spec:*/}}
-{{/*  type: ExternalName*/}}
-{{/*  externalName: {{.Chart.Name}}-router.com*/}}
-
-{{/*---*/}}
-{{/*apiVersion: networking.istio.io/v1alpha3*/}}
-{{/*kind: VirtualService*/}}
-{{/*metadata:*/}}
-{{/*  name: {{.Chart.Name}}-router*/}}
-{{/*  namespace: {{.Values.namespace}}*/}}
-{{/*  labels:*/}}
-{{/*    app: {{.Chart.Name}}-router*/}}
-{{/*spec:*/}}
-{{/*  hosts:*/}}
-{{/*    - {{.Chart.Name}}-router*/}}
-{{/*  gateways:*/}}
-{{/*    - mesh*/}}
-{{/*  http:*/}}
-{{/*    - route:*/}}
-{{/*        - destination:*/}}
-{{/*            host: "{{.Chart.Name}}"*/}}
-{{/*            port:*/}}
-{{/*              number: 8080*/}}
-{{/*      mirror:*/}}
-{{/*        host: "{{.Chart.Name}}-canary"*/}}
-{{/*        port:*/}}
-{{/*          number: 8080*/}}
+    - match:
+        - uri:
+            prefix: /{{.Chart.Name}}/canary
+      route:
+        - destination:
+            host: {{.Chart.Name}}-canary
+            port:
+              number: 8080
