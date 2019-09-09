@@ -25,9 +25,11 @@ spec:
       - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
       - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
       - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+      - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
     match:
       - uri:
-          prefix: /{{.Chart.Name}}
+          prefix: /
   skipAnalysis: false
   canaryAnalysis:
     interval: {{.Values.releaseApprovalPollingInterval}}

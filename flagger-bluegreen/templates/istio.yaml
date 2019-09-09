@@ -42,8 +42,10 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+        - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
     - port:
         number: 443
         name: https
@@ -55,40 +57,68 @@ spec:
       hosts:
         - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
         - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+        - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
 
 ---
+{{/*https://istio.io/docs/ops/traffic-management/deploy-guidelines/#multiple-virtual-services-and-destination-rules-for-the-same-host*/}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{.Chart.Name}}
+  name: {{.Chart.Name}}-mirroring
   namespace: {{.Values.namespace}}
   labels:
-    app: {{.Chart.Name}}
+    app: {{.Chart.Name}}-mirroring
 spec:
   hosts:
     - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
     - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
     - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
     - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
   gateways:
     - {{.Chart.Name}}
     - vpce-{{.Chart.Name}}
   http:
     - match:
         - uri:
-            prefix: /{{.Chart.Name}}
+            prefix: /
       route:
         - destination:
-            host: {{.Chart.Name}}
+            host: {{.Chart.Name}}-primary
             port:
               number: 8080
       mirror:
         host: {{.Chart.Name}}-canary
         port:
           number: 8080
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{.Chart.Name}}-canary
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{.Chart.Name}}-canary
+spec:
+  hosts:
+    - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
+  gateways:
+    - {{.Chart.Name}}
+    - vpce-{{.Chart.Name}}
+  http:
     - match:
         - uri:
-            prefix: /{{.Chart.Name}}/canary
+            prefix: /canary
+      rewrite:
+        uri: /
       route:
         - destination:
             host: {{.Chart.Name}}-canary

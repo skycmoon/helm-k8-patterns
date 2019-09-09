@@ -2,7 +2,7 @@ version: latest
 namespace: bluegreen
 environment: test
 region: us-west-2
-clusterName: eks-dev-compute-i
+clusterName: eks-dev-compute
 
 numreplicas: 2
 maxreplicas: 5
