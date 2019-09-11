@@ -1,10 +1,10 @@
 version: latest
-namespace: bluegreen
+namespace: barge
 environment: test
 region: us-west-2
 clusterName: eks-dev-compute
 
-numreplicas: 2
+numreplicas: 1
 maxreplicas: 5
 maxutilization: 85
 

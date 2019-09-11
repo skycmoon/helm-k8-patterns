@@ -65,10 +65,10 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{.Chart.Name}}-mirroring
+  name: {{.Chart.Name}}-main
   namespace: {{.Values.namespace}}
   labels:
-    app: {{.Chart.Name}}-mirroring
+    app: {{.Chart.Name}}-main
 spec:
   hosts:
     - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
@@ -83,44 +83,48 @@ spec:
   http:
     - match:
         - uri:
-            prefix: /
+            prefix: /app
       route:
         - destination:
-            host: {{.Chart.Name}}-primary
-            port:
-              number: 8080
+            host: {{.Chart.Name}}
       mirror:
         host: {{.Chart.Name}}-canary
-        port:
-          number: 8080
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: {{.Chart.Name}}-canary
-  namespace: {{.Values.namespace}}
-  labels:
-    app: {{.Chart.Name}}-canary
-spec:
-  hosts:
-    - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-    - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
-  gateways:
-    - {{.Chart.Name}}
-    - vpce-{{.Chart.Name}}
-  http:
     - match:
         - uri:
-            prefix: /canary
+            prefix: /canary/app
       rewrite:
-        uri: /
+        uri: /app
       route:
         - destination:
             host: {{.Chart.Name}}-canary
-            port:
-              number: 8080
+
+{{/*---*/}}
+{{/*apiVersion: networking.istio.io/v1alpha3*/}}
+{{/*kind: VirtualService*/}}
+{{/*metadata:*/}}
+{{/*  name: {{.Chart.Name}}-canary*/}}
+{{/*  namespace: {{.Values.namespace}}*/}}
+{{/*  labels:*/}}
+{{/*    app: {{.Chart.Name}}-canary*/}}
+{{/*spec:*/}}
+{{/*  hosts:*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com*/}}
+{{/*    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com*/}}
+{{/*  gateways:*/}}
+{{/*    - {{.Chart.Name}}*/}}
+{{/*    - vpce-{{.Chart.Name}}*/}}
+{{/*  http:*/}}
+{{/*    - match:*/}}
+{{/*        - uri:*/}}
+{{/*            prefix: /canary/app*/}}
+{{/*      rewrite:*/}}
+{{/*        uri: /app*/}}
+{{/*      route:*/}}
+{{/*        - destination:*/}}
+{{/*            host: {{.Chart.Name}}-canary*/}}
+{{/*            port:*/}}
+{{/*              number: 8080*/}}

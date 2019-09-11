@@ -14,31 +14,45 @@ spec:
     - secretName: public-cert
     - secretName: private-cert
   rules:
-    - host: {{.Chart.Name }}.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - host: amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
-            path: /
-    - host: {{.Chart.Name }}.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+            path: /app
+    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
-            path: /
-    - host: {{.Chart.Name }}.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+            path: /app
+    - host: amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
-            path: /
-    - host: {{.Chart.Name }}.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+            path: /app
+    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
-            path: /
+            path: /app
+    - host: amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+      http:
+        paths:
+          - backend:
+              serviceName: {{.Chart.Name}}
+              servicePort: 8080
+            path: /app
+    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+      http:
+        paths:
+          - backend:
+              serviceName: {{.Chart.Name}}
+              servicePort: 8080
+            path: /app

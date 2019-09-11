@@ -24,7 +24,7 @@ spec:
         deployedTime: {{ now }} # use `now` to make sure every time the deployment is different, so that no need to use `--recreate-pods`
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
-        prometheus.io/path: /metrics
+        prometheus.io/path: /app/metrics
     spec:
       containers:
         - name: {{.Chart.Name}}
@@ -35,15 +35,22 @@ spec:
           env:
             - name: VERSION
               value: {{.Values.version}}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - sleep 3
           livenessProbe:
             httpGet:
-              path: /
+              path: /app
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 60
           readinessProbe:
             httpGet:
-              path: /
+              path: /app
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 3
