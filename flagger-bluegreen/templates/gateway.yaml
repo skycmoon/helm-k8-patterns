@@ -13,8 +13,7 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.eks.{{ template "env-name" . }}.egailabs.expedia.com
     - port:
         number: 443
         name: https
@@ -24,14 +23,13 @@ spec:
         serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
         privateKey: /etc/istio/ingressgateway-certs/tls.key
       hosts:
-        - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.eks.{{ template "env-name" . }}.egailabs.expedia.com
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: vpce-{{.Chart.Name}}
+  name: private-{{.Chart.Name}}
   namespace: {{.Values.namespace}}
 spec:
   selector:
@@ -42,10 +40,8 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-        - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.eks.i.{{ template "env-name" . }}.egailabs.expedia.com
+        - amerigo.eks.egailabs.eglocal.exp-{{ template "env-name" . }}.net
     - port:
         number: 443
         name: https
@@ -55,10 +51,9 @@ spec:
         serverCertificate: /etc/istio/vpce-ingressgateway-certs/tls.crt
         privateKey: /etc/istio/vpce-ingressgateway-certs/tls.key
       hosts:
-        - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-        - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
-        - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
+        - amerigo.eks.i.{{ template "env-name" . }}.egailabs.expedia.com
+        - amerigo.eks.egailabs.eglocal.exp-{{ template "env-name" . }}.net
+
 
 ---
 {{/*https://istio.io/docs/ops/traffic-management/deploy-guidelines/#multiple-virtual-services-and-destination-rules-for-the-same-host*/}}
@@ -71,15 +66,13 @@ metadata:
     app: {{.Chart.Name}}-main
 spec:
   hosts:
-    - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-    - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
-    - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
+    - amerigo.eks.{{ template "env-name" . }}.egailabs.expedia.com
+    - amerigo.eks.i.{{ template "env-name" . }}.egailabs.expedia.com
+    - amerigo.eks.egailabs.eglocal.exp-{{ template "env-name" . }}.net
+
   gateways:
     - {{.Chart.Name}}
-    - vpce-{{.Chart.Name}}
+    - private-{{.Chart.Name}}
   http:
     - match:
         - uri:

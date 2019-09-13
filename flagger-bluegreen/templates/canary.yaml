@@ -17,16 +17,6 @@ spec:
     name: {{.Chart.Name}}
   service:
     port: 8080
-    gateways:
-      - {{.Chart.Name}}
-      - vpce-{{.Chart.Name}}
-    hosts:
-      - amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
-      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
-      - amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
-      - amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
-      - amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
     match:
       - uri:
           prefix: /app

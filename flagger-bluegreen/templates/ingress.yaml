@@ -14,42 +14,42 @@ spec:
     - secretName: public-cert
     - secretName: private-cert
   rules:
-    - host: amerigo.{{.Values.clusterName}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - host: amerigo.eks-{{.Values.cluster}}.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
             path: /app
-    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
+    - host: amerigo.eks-{{.Values.cluster}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
             path: /app
-    - host: amerigo.{{.Values.clusterName}}.i.{{.Values.environment}}.egailabs.expedia.com
+    - host: amerigo.eks-{{.Values.cluster}}.egailabs.eglocal.exp-{{.Values.environment}}.net
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
             path: /app
-    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
+    - host: amerigo.eks-{{.Values.cluster}}.{{.Values.region}}.egailabs.eglocal.exp-{{.Values.environment}}.net
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
             path: /app
-    - host: amerigo.{{.Values.clusterName}}.{{.Values.environment}}.egailabs.expedia.com
+    - host: amerigo.eks-{{.Values.cluster}}.i.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:
               serviceName: {{.Chart.Name}}
               servicePort: 8080
             path: /app
-    - host: amerigo.{{.Values.clusterName}}.{{.Values.region}}.{{.Values.environment}}.egailabs.expedia.com
+    - host: amerigo.eks-{{.Values.cluster}}.{{.Values.region}}.i.{{.Values.environment}}.egailabs.expedia.com
       http:
         paths:
           - backend:

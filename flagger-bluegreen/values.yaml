@@ -2,7 +2,7 @@ version: latest
 namespace: barge
 environment: test
 region: us-west-2
-clusterName: eks-dev-compute
+cluster: dev-compute
 
 numreplicas: 1
 maxreplicas: 5
