@@ -1,0 +1,14 @@
+version: v0.3.0
+namespace: default
+environment: test
+region: us-west-2
+cluster: pipeline-compute
+
+numreplicas: 2
+maxreplicas: 5
+cpuUtilizationThreshold: 70
+memUtilizationThreshold: 80
+cpuRequest: 0.5
+cpuLimit: 1
+memRequest: 250Mi
+memLimit: 500Mi

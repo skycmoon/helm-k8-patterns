@@ -1,0 +1,19 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{.Chart.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{.Chart.Name }}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: local.eks-{{ .Values.cluster }}.us-west-2.{{.Values.environment}}.egailabs.expedia.com
+      http:
+        paths:
+          - backend:
+              serviceName: {{.Chart.Name}}
+              servicePort: 80
+            path: /app
